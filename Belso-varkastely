@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Belső Várkastély – Bibliai Értelmező</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --parchment: #f2e8d5;
+    --parchment-dark: #e8d9b8;
+    --ink: #1a1208;
+    --ink-light: #3d2e0f;
+    --gold: #b8860b;
+    --gold-light: #d4a017;
+    --gold-shine: #f0c040;
+    --crimson: #6b1a1a;
+    --crimson-light: #8b2e2e;
+    --mystic-blue: #1a2840;
+    --stone: #8b7355;
+    --stone-light: #a89070;
+    --shadow: rgba(26, 18, 8, 0.4);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background-color: var(--mystic-blue);
+    background-image:
+      radial-gradient(ellipse at 20% 20%, rgba(184,134,11,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(107,26,26,0.12) 0%, transparent 50%),
+      url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23b8860b' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    min-height: 100vh;
+    font-family: 'IM Fell English', Georgia, serif;
+    color: var(--ink);
+    overflow-x: hidden;
+  }
+
+  /* STARS */
+  .stars {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .star {
+    position: absolute;
+    background: #f0c040;
+    border-radius: 50%;
+    animation: twinkle var(--dur) ease-in-out infinite alternate;
+    opacity: var(--op);
+  }
+  @keyframes twinkle {
+    from { opacity: var(--op); transform: scale(1); }
+    to { opacity: calc(var(--op) * 0.3); transform: scale(0.7); }
+  }
+
+  /* HEADER */
+  header {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    padding: 3rem 2rem 2rem;
+    border-bottom: 1px solid rgba(184,134,11,0.3);
+  }
+
+  .castle-icon {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 0.5rem;
+    filter: drop-shadow(0 0 12px rgba(212,160,23,0.6));
+    animation: glow-pulse 3s ease-in-out infinite alternate;
+  }
+  @keyframes glow-pulse {
+    from { filter: drop-shadow(0 0 8px rgba(212,160,23,0.4)); }
+    to { filter: drop-shadow(0 0 20px rgba(212,160,23,0.8)); }
+  }
+
+  h1 {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(1.2rem, 4vw, 2.2rem);
+    color: var(--gold-light);
+    letter-spacing: 0.05em;
+    text-shadow: 0 0 30px rgba(184,134,11,0.5), 2px 2px 4px rgba(0,0,0,0.8);
+    line-height: 1.3;
+  }
+
+  .subtitle {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    color: var(--stone-light);
+    letter-spacing: 0.2em;
+    margin-top: 0.5rem;
+    text-transform: uppercase;
+    font-style: italic;
+  }
+
+  /* MAIN LAYOUT */
+  .main-container {
+    position: relative;
+    z-index: 10;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  /* CASTLE MAP */
+  .castle-map {
+    display: flex;
+    justify-content: center;
+    gap: 0.4rem;
+    margin: 2rem 0;
+    flex-wrap: wrap;
+  }
+
+  .room-btn {
+    background: transparent;
+    border: 1px solid rgba(184,134,11,0.3);
+    color: var(--stone-light);
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    padding: 0.5rem 0.7rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    position: relative;
+    overflow: hidden;
+  }
+  .room-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent, rgba(184,134,11,0.05));
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .room-btn:hover::before, .room-btn.active::before { opacity: 1; }
+  .room-btn:hover, .room-btn.active {
+    border-color: var(--gold);
+    color: var(--gold-light);
+    text-shadow: 0 0 8px rgba(184,134,11,0.5);
+    box-shadow: 0 0 12px rgba(184,134,11,0.15), inset 0 0 12px rgba(184,134,11,0.05);
+  }
+  .room-btn.active {
+    background: rgba(184,134,11,0.08);
+  }
+
+  /* INPUT PANEL */
+  .input-panel {
+    background: linear-gradient(145deg, rgba(242,232,213,0.06), rgba(242,232,213,0.02));
+    border: 1px solid rgba(184,134,11,0.25);
+    border-radius: 2px;
+    padding: 2rem;
+    position: relative;
+    margin-bottom: 2rem;
+  }
+  .input-panel::before {
+    content: '✦';
+    position: absolute;
+    top: -0.7rem; left: 50%;
+    transform: translateX(-50%);
+    color: var(--gold);
+    background: var(--mystic-blue);
+    padding: 0 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .input-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    color: var(--stone-light);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 0.75rem;
+  }
+
+  textarea {
+    width: 100%;
+    background: rgba(26,18,8,0.4);
+    border: 1px solid rgba(184,134,11,0.2);
+    color: var(--parchment);
+    font-family: 'IM Fell English', Georgia, serif;
+    font-size: 1rem;
+    padding: 1rem;
+    resize: vertical;
+    min-height: 100px;
+    outline: none;
+    transition: border-color 0.3s;
+    line-height: 1.6;
+    border-radius: 1px;
+  }
+  textarea:focus { border-color: var(--gold); }
+  textarea::placeholder { color: rgba(139,115,85,0.5); font-style: italic; }
+
+  .mode-row {
+    display: flex;
+    gap: 0.5rem;
+    margin: 1rem 0;
+    flex-wrap: wrap;
+  }
+  .mode-btn {
+    background: rgba(26,18,8,0.3);
+    border: 1px solid rgba(184,134,11,0.2);
+    color: var(--stone-light);
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    padding: 0.4rem 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-radius: 1px;
+  }
+  .mode-btn:hover, .mode-btn.active {
+    background: rgba(184,134,11,0.12);
+    border-color: var(--gold);
+    color: var(--gold-light);
+  }
+
+  .submit-btn {
+    width: 100%;
+    background: linear-gradient(135deg, rgba(107,26,26,0.6), rgba(184,134,11,0.15));
+    border: 1px solid var(--gold);
+    color: var(--gold-light);
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 0.85rem;
+    padding: 0.9rem 2rem;
+    cursor: pointer;
+    letter-spacing: 0.15em;
+    transition: all 0.4s;
+    text-transform: uppercase;
+    margin-top: 0.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .submit-btn::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 0; height: 0;
+    background: rgba(240,192,64,0.1);
+    border-radius: 50%;
+    transform: translate(-50%,-50%);
+    transition: width 0.6s, height 0.6s;
+  }
+  .submit-btn:hover::after { width: 300px; height: 300px; }
+  .submit-btn:hover {
+    background: linear-gradient(135deg, rgba(139,46,46,0.7), rgba(212,160,23,0.2));
+    box-shadow: 0 0 20px rgba(184,134,11,0.3), 0 0 40px rgba(184,134,11,0.1);
+    text-shadow: 0 0 10px rgba(240,192,64,0.5);
+  }
+  .submit-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* LOADING */
+  .loading {
+    text-align: center;
+    padding: 3rem;
+    display: none;
+  }
+  .loading.visible { display: block; }
+  .candleflame {
+    display: inline-block;
+    font-size: 2.5rem;
+    animation: flicker 0.8s ease-in-out infinite alternate;
+  }
+  @keyframes flicker {
+    0% { transform: scaleY(1) rotate(-1deg); filter: brightness(1); }
+    50% { transform: scaleY(1.08) rotate(1deg); filter: brightness(1.2); }
+    100% { transform: scaleY(0.95) rotate(-2deg); filter: brightness(0.9); }
+  }
+  .loading-text {
+    font-family: 'Cinzel', serif;
+    color: var(--stone-light);
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-top: 1rem;
+    animation: fade-pulse 2s ease-in-out infinite;
+  }
+  @keyframes fade-pulse {
+    0%,100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+
+  /* RESPONSE PANEL */
+  .response-area {
+    display: none;
+  }
+  .response-area.visible { display: block; }
+
+  .response-header {
+    font-family: 'Cinzel', serif;
+    color: var(--gold);
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(184,134,11,0.2);
+  }
+
+  .room-card {
+    background: linear-gradient(145deg, rgba(242,232,213,0.05), rgba(242,232,213,0.02));
+    border: 1px solid rgba(184,134,11,0.2);
+    border-left: 3px solid var(--gold);
+    padding: 1.5rem;
+    margin-bottom: 1.2rem;
+    position: relative;
+    animation: card-appear 0.5s ease forwards;
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  @keyframes card-appear {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .room-card-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    color: var(--gold-light);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .room-number {
+    background: rgba(184,134,11,0.15);
+    border: 1px solid rgba(184,134,11,0.3);
+    color: var(--gold);
+    font-size: 0.65rem;
+    padding: 0.15rem 0.4rem;
+    font-family: 'Cinzel', serif;
+  }
+
+  .room-card-body {
+    color: var(--parchment);
+    line-height: 1.8;
+    font-size: 0.95rem;
+  }
+
+  .single-response {
+    background: linear-gradient(145deg, rgba(242,232,213,0.05), rgba(242,232,213,0.02));
+    border: 1px solid rgba(184,134,11,0.25);
+    padding: 2rem;
+    color: var(--parchment);
+    line-height: 1.9;
+    font-size: 1rem;
+    animation: card-appear 0.5s ease forwards;
+    opacity: 0;
+    position: relative;
+  }
+  .single-response::before, .single-response::after {
+    content: '❧';
+    color: var(--gold);
+    display: block;
+    text-align: center;
+    margin: 0.5rem 0;
+    font-size: 1.2rem;
+    opacity: 0.6;
+  }
+
+  .ornament {
+    text-align: center;
+    color: var(--gold);
+    opacity: 0.4;
+    margin: 2rem 0 1rem;
+    font-size: 1.2rem;
+    letter-spacing: 0.5rem;
+  }
+
+  /* SCROLL indicator */
+  .scroll-hint {
+    text-align: center;
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    color: rgba(139,115,85,0.4);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(184,134,11,0.1);
+  }
+
+  /* QUOTE */
+  .opening-quote {
+    text-align: center;
+    color: var(--stone-light);
+    font-style: italic;
+    font-size: 0.95rem;
+    line-height: 1.8;
+    max-width: 520px;
+    margin: 0 auto 2.5rem;
+    padding: 1.5rem;
+    border-top: 1px solid rgba(184,134,11,0.15);
+    border-bottom: 1px solid rgba(184,134,11,0.15);
+    position: relative;
+  }
+  .opening-quote .attr {
+    display: block;
+    margin-top: 0.75rem;
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-style: normal;
+    opacity: 0.7;
+  }
+
+  /* EXAMPLES */
+  .examples-row {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.75rem;
+  }
+  .example-tag {
+    background: rgba(26,18,8,0.3);
+    border: 1px solid rgba(184,134,11,0.15);
+    color: rgba(139,115,85,0.7);
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    padding: 0.3rem 0.6rem;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    transition: all 0.3s;
+  }
+  .example-tag:hover {
+    border-color: rgba(184,134,11,0.4);
+    color: var(--stone-light);
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: rgba(26,18,8,0.3); }
+  ::-webkit-scrollbar-thumb { background: rgba(184,134,11,0.3); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(184,134,11,0.5); }
+
+  @media (max-width: 600px) {
+    .input-panel { padding: 1.25rem; }
+    .room-card { padding: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+
+<header>
+  <span class="castle-icon">🏰</span>
+  <h1>A Belső Várkastély</h1>
+  <p class="subtitle">Avilai Szent Teréz nyomán · Bibliai értelmező</p>
+</header>
+
+<div class="main-container">
+
+  <div class="opening-quote">
+    „A Biblia nem egy fal, amelynek nekitámaszkodunk, hanem egy ajtó, amelyen be kell lépni."
+    <span class="attr">— A hét lakás szellemiségében</span>
+  </div>
+
+  <!-- CASTLE MAP -->
+  <div class="castle-map" id="castleMap">
+    <button class="room-btn active" data-room="all">Összes lakás</button>
+    <button class="room-btn" data-room="1">I. Lakás</button>
+    <button class="room-btn" data-room="2">II. Lakás</button>
+    <button class="room-btn" data-room="3">III. Lakás</button>
+    <button class="room-btn" data-room="4">IV. Lakás</button>
+    <button class="room-btn" data-room="5">V. Lakás</button>
+    <button class="room-btn" data-room="6">VI. Lakás</button>
+    <button class="room-btn" data-room="7">VII. Lakás</button>
+  </div>
+
+  <!-- INPUT PANEL -->
+  <div class="input-panel">
+    <label class="input-label" for="verseInput">Írj be egy bibliai szakaszt vagy igét</label>
+    <textarea id="verseInput" placeholder="Pl.: „Szemet szemért, fogat fogért" (Mt 5,38) — vagy bármely ige, amit mélyebben szeretnél érteni..."></textarea>
+
+    <div class="examples-row">
+      <span style="font-family:'Cinzel',serif;font-size:0.6rem;color:rgba(139,115,85,0.5);letter-spacing:0.1em;text-transform:uppercase;align-self:center;">Példák:</span>
+      <button class="example-tag" onclick="setExample('Szeresd felebarátodat, mint önmagadat (Mt 22,39)')">Szeresd felebarátodat</button>
+      <button class="example-tag" onclick="setExample('Boldogok a lelki szegények (Mt 5,3)')">Boldogok a lelki szegények</button>
+      <button class="example-tag" onclick="setExample('Az Úr az én pásztorom (Zsolt 23)')">Az Úr az én pásztorom</button>
+      <button class="example-tag" onclick="setExample('Én vagyok az út, az igazság és az élet (Jn 14,6)')">Én vagyok az út</button>
+    </div>
+
+    <div class="mode-row">
+      <button class="mode-btn active" data-mode="all_rooms" onclick="setMode(this)">🏰 Mind a 7 lakás</button>
+      <button class="mode-btn" data-mode="single_room" onclick="setMode(this)">🕯️ Kiválasztott lakás</button>
+      <button class="mode-btn" data-mode="journey" onclick="setMode(this)">🗺️ Spirituális út</button>
+      <button class="mode-btn" data-mode="meditation" onclick="setMode(this)">🌿 Meditáció</button>
+    </div>
+
+    <button class="submit-btn" id="submitBtn" onclick="interpret()">
+      ✦ &nbsp; Nyíljék meg az ajtó &nbsp; ✦
+    </button>
+  </div>
+
+  <!-- LOADING -->
+  <div class="loading" id="loading">
+    <div class="candleflame">🕯️</div>
+    <div class="loading-text">A lélek mélyére merülünk...</div>
+  </div>
+
+  <!-- RESPONSE -->
+  <div class="response-area" id="responseArea">
+    <div class="response-header" id="responseHeader"></div>
+    <div id="responseContent"></div>
+    <div class="ornament">✦ ✦ ✦</div>
+  </div>
+
+  <div class="scroll-hint">Avilai Szent Teréz · A Belső Várkastély · 1577</div>
+</div>
+
+<script>
+// Stars
+const starsEl = document.getElementById('stars');
+for (let i = 0; i < 80; i++) {
+  const s = document.createElement('div');
+  s.className = 'star';
+  const size = Math.random() * 2 + 0.5;
+  s.style.cssText = `
+    width:${size}px;height:${size}px;
+    top:${Math.random()*100}%;left:${Math.random()*100}%;
+    --dur:${2+Math.random()*4}s;
+    --op:${0.1+Math.random()*0.5};
+  `;
+  starsEl.appendChild(s);
+}
+
+// State
+let selectedRoom = 'all';
+let selectedMode = 'all_rooms';
+
+// Room buttons
+document.querySelectorAll('.room-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.room-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedRoom = btn.dataset.room;
+  });
+});
+
+function setMode(btn) {
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedMode = btn.dataset.mode;
+}
+
+function setExample(text) {
+  document.getElementById('verseInput').value = text;
+}
+
+const ROOM_DESCRIPTIONS = {
+  '1': 'Első lakás – Az egó világa, a külső vallásosság, szabályok és fegyelem. A lélek még alig ismeri önmagát.',
+  '2': 'Második lakás – A meghívás elfogadása, a küzdelem a bűnös szokásokkal, az imádság kezdete.',
+  '3': 'Harmadik lakás – Rendezett kegyesség, erkölcsi élet, de még a saját erőre támaszkodás dominál.',
+  '4': 'Negyedik lakás – Az isteni kegyelem első érintése, a kontempláció kezdete, a szív megnyílása.',
+  '5': 'Ötödik lakás – Egyesülés Istennel, mint lepke a bábból: halál és újjászületés élménye.',
+  '6': 'Hatodik lakás – Misztikus jegyesség, mély belső szenvedés és elragadtatás váltakozása.',
+  '7': 'Hetedik lakás – Lelki házasság, tökéletes egyesülés Istennel, belső béke és külső cselekvés egysége.'
+};
+
+function buildPrompt(verse, mode, room) {
+  const roomContext = room !== 'all'
+    ? `Csak a(z) ${room}. lakás szemszögéből értelmezd! ${ROOM_DESCRIPTIONS[room]}`
+    : 'Mind a hét lakás szemszögéből értelmezd, minden lakáshoz külön szakaszt írva.';
+
+  const modeInstructions = {
+    all_rooms: `Értelmezd az alábbi bibliai igét/szakaszt Avilai Szent Teréz "A Belső Várkastély" hét lakásának keretrendszerében. ${roomContext}
+
+Minden lakásnál írd le:
+- Hogyan olvassa ezt az igét valaki, aki ebben a lakásban tartózkodik?
+- Mit jelent számára, mit érez, mit csinál ezzel a szöveggel?
+- Milyen veszélyei vagy ajándékai vannak ennek az értelmezési szintnek?
+
+Legyen a hangvétel mélyen spirituális, meleg, kontemplatív – nem akadémikus, hanem a szív nyelvén szóljon.`,
+
+    single_room: `Értelmezd az alábbi bibliai igét/szakaszt Avilai Szent Teréz "A Belső Várkastély" szemszögéből. ${roomContext}
+
+Írj egy elmélyült, meditációs jellegű értelmezést: hogyan szól ez az ige valakihez, aki ebben a lelki állapotban van? Mi a kihívás, mi az ajándék, mi a következő lépés?`,
+
+    journey: `Az alábbi bibliai igét/szakaszt értelmezd mint egy spirituális utazás térképét Avilai Szent Teréz "A Belső Várkastély" rendszerében.
+
+Mutasd meg:
+1. Hol helyezkedik el ez az ige a lakások skáláján?
+2. Miért veszélyes, ha korábbi lakásból olvassuk?
+3. Miért nyílik meg teljesen, ha a belső lakásokból közelítünk felé?
+4. Hogyan lehet ez az ige maga is "ajtó" a következő lakás felé?`,
+
+    meditation: `Az alábbi bibliai igét/szakaszt alakítsd át egy mély meditációs elmélkedéssé Avilai Szent Teréz "A Belső Várkastély" szellemében.
+
+A meditáció tartalmazzon:
+- Egy bevezető csendet (hogyan üljünk le ezzel az igével)
+- A szavak rétegeit (mit jelent a felszínen, és mit a mélységben)
+- Egy belső kérdést, amellyel a lélek tovább haladhat
+- Egy záró fohászt vagy szándékot
+
+Legyen mélyen kontemplatív, szép, a csend nyelvén szóló.`
+  };
+
+  return `${modeInstructions[mode]}
+
+A bibliai ige/szakasz:
+"${verse}"
+
+Írj magyarul. Legyen a szöveg gazdag, de ne túlságosan hosszú – inkább mély, mint bő. Kerüld a sablonos vallási fordulatokat. Szólj a szív mélyéhez.`;
+}
+
+async function interpret() {
+  const verse = document.getElementById('verseInput').value.trim();
+  if (!verse) {
+    document.getElementById('verseInput').style.borderColor = '#8b2e2e';
+    setTimeout(() => document.getElementById('verseInput').style.borderColor = '', 1500);
+    return;
+  }
+
+  const submitBtn = document.getElementById('submitBtn');
+  const loading = document.getElementById('loading');
+  const responseArea = document.getElementById('responseArea');
+
+  submitBtn.disabled = true;
+  loading.classList.add('visible');
+  responseArea.classList.remove('visible');
+
+  try {
+    const prompt = buildPrompt(verse, selectedMode, selectedRoom);
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: `Te Avilai Szent Teréz "A Belső Várkastély" című művének mélységeiben jártas spirituális kísérő vagy. 
+Értelmezéseid nem vallási leckék, hanem élő, meleg, a belső utazásra hívó reflexiók. 
+Mindig a lélek fejlődési útját tartod szem előtt, és kerülöd a kiragadott idézetek egysíkú használatát.
+Minden igét a maga "lakásában" helyezel el, és segítesz az olvasónak megérteni, hogyan szólhat hozzá mélyebben.
+Mindig magyarul válaszolsz, szép, irodalmi, de közérthető nyelven.`,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const data = await response.json();
+    const text = data.content?.[0]?.text || 'A válasz nem érkezett meg. Kérlek, próbáld újra.';
+
+    displayResponse(text, verse);
+
+  } catch (err) {
+    displayResponse('A fény egy pillanatra elhomályosult. Kérlek, próbáld újra.', verse);
+  } finally {
+    submitBtn.disabled = false;
+    loading.classList.remove('visible');
+  }
+}
+
+function displayResponse(text, verse) {
+  const responseArea = document.getElementById('responseArea');
+  const responseHeader = document.getElementById('responseHeader');
+  const responseContent = document.getElementById('responseContent');
+
+  const modeLabels = {
+    all_rooms: '✦ A Hét Lakás Értelmezése ✦',
+    single_room: '✦ Egy Lakás Mélysége ✦',
+    journey: '✦ Spirituális Útitérkép ✦',
+    meditation: '✦ Kontemplatív Elmélkedés ✦'
+  };
+
+  responseHeader.textContent = modeLabels[selectedMode] || '✦ Értelmezés ✦';
+
+  // Parse room cards if all_rooms mode
+  if (selectedMode === 'all_rooms' && selectedRoom === 'all') {
+    responseContent.innerHTML = parseRoomCards(text);
+  } else {
+    responseContent.innerHTML = `<div class="single-response">${formatText(text)}</div>`;
+  }
+
+  responseArea.classList.add('visible');
+  responseArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  // Animate cards
+  document.querySelectorAll('.room-card').forEach((card, i) => {
+    card.style.animationDelay = `${i * 0.12}s`;
+  });
+}
+
+function parseRoomCards(text) {
+  // Try to detect room sections
+  const roomPatterns = [
+    /(\*{0,2})(I{1,3}V?|VI{0,2}I?|VII)\.?\s*lakás|\d+\.\s*lakás/gi,
+    /Első|Második|Harmadik|Negyedik|Ötödik|Hatodik|Hetedik/gi
+  ];
+
+  // Split by numbered sections or room headings
+  const sections = text.split(/\n(?=(?:\*{0,2}(?:I{1,3}V?|VI{0,2}I?|VII|[1-7])\.?\s*[Ll]akás|\*{0,2}[Ee]lső|\*{0,2}[Mm]ásodik|\*{0,2}[Hh]armadik|\*{0,2}[Nn]egyedik|\*{0,2}[Öö]tödik|\*{0,2}[Hh]atodik|\*{0,2}[Hh]etedik))/);
+
+  if (sections.length > 1) {
+    return sections.map((section, i) => {
+      const titleMatch = section.match(/^([^\n]+)/);
+      const title = titleMatch ? titleMatch[1].replace(/\*/g, '').trim() : `${i+1}. Lakás`;
+      const body = section.replace(/^[^\n]+\n?/, '').trim();
+      const num = i + 1;
+      if (!body && i === 0) return `<div class="single-response">${formatText(section)}</div>`;
+      return `
+        <div class="room-card">
+          <div class="room-card-title">
+            <span class="room-number">${num}</span>
+            ${title}
+          </div>
+          <div class="room-card-body">${formatText(body || section)}</div>
+        </div>`;
+    }).join('');
+  }
+
+  // Fallback: single card
+  return `<div class="single-response">${formatText(text)}</div>`;
+}
+
+function formatText(text) {
+  return text
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+    .replace(/\n\n/g, '</p><p>')
+    .replace(/\n/g, '<br>')
+    .replace(/^/, '<p>')
+    .replace(/$/, '</p>');
+}
+
+// Enter key
+document.getElementById('verseInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.ctrlKey) interpret();
+});
+</script>
+</body>
+</html>
